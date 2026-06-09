@@ -1,0 +1,15 @@
+Se dibujaron e implementaron las pantallas de inicio, instrucciones, victoria y derrota.
+Se cambiaron los colores del jugador (ahora minero), obstáculos, manzana (ahora diamante).
+Se implementó un sistema de niveles, donde cada nivel (de 3) tiene 5 diamantes y
+más obstáculos.
+Se implementó la mecánica de destruir obstáculos con la tecla E, esto no se muestra en las
+instrucciones.
+Ahora los bordes y obstaculos no hacen perder instantaneamente al jugador.
+Se implementó un contador de diamantes.
+
+
+Justificaciones:
+Cambiamos las pantallas a las mostradas en el storyboard ya que las nuevas nos parecieron
+mas creativas y entretenidas.
+Los obstaculos y el limite del tablero ya no hacen perder el juego ya que se implementarán
+dos posibles condiciones de derrota, un topo y un contador de oxígeno restante.
