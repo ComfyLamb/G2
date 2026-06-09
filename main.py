@@ -31,9 +31,9 @@ TOPO = 4
 #niveles
 NIVELES = [
     {
-        "diamantes": 5, "rocas": 25},
-        {"diamantes": 5, "rocas": 30},
-        {"diamantes": 5, "rocas":35
+        "diamantes": 5, "rocas": 25, "topo": 1},
+        {"diamantes": 5, "rocas": 30, "topo": 1},
+        {"diamantes": 5, "rocas":35, "topo": 1
     }    
 ]
 
@@ -105,6 +105,9 @@ def poblar_tablero(tablero, nivel):
 
     for i in range(config["diamantes"]):
         aparecer_aleatorio(tablero, DIAMANTE)
+    
+    for i in range(config["topo"]):
+        aparecer_aleatorio(tablero, TOPO)
 
 
 def refrescar_tablero(screen, tablero, diamantes, objetivo, fuente):
@@ -123,24 +126,28 @@ def refrescar_tablero(screen, tablero, diamantes, objetivo, fuente):
         pos_x = 0
         for j in range(COLUMNAS):
             if tablero[i][j] == OBSTACULO:
-                # Dibuja un rectángulo en la posición (pos_x, pos_y) y que sea
-                # de tamaño (ancho_elem, alto_elem) y color negro.
                 pygame.draw.rect(
                     screen,
                     "grey",
                     pygame.Rect((pos_x, pos_y), (ancho_elem, alto_elem)),
                 )
             elif tablero[i][j] == JUGADOR:
-                # Dibujamos un círculo verde en la posición (pos_x + radio, pos_y + radio),
-                # con un radio definido por la variable "radio" (ancho_elem / 2).
                 pygame.draw.circle(
                     screen,
                     "yellow",
                     (pos_x + radio, pos_y + radio),
                     radio,
                 )
-            elif tablero[i][j] == DIAMANTE:
+            
+            elif tablero[i][j] == TOPO:
+                pygame.draw.circle(
+                    screen,
+                    "brown",
+                    (pos_x + radio, pos_y + radio),
+                    radio,
+                )
 
+            elif tablero[i][j] == DIAMANTE:
                 pygame.draw.polygon(
                 screen,
                 "cyan",
@@ -236,6 +243,9 @@ def avanzar(tablero, pos_jugador, direccion):
 
     # Obtenemos el elemento que se encuentre en el tablero en la nueva posición del jugador.
     pos_elem = tablero[ind_nueva_fila][ind_nueva_col]
+
+    if pos_elem == TOPO:
+        return "derrota", pos_jugador
 
     if pos_elem == OBSTACULO:
         return "ok", pos_jugador
