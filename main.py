@@ -2,7 +2,7 @@
 import os
 import random
 import pygame
-
+#prueba
 #estados
 ESTADO_INICIO = "inicio"
 ESTADO_INSTRUCCIONES = "instrucciones"
