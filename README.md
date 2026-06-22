@@ -8,18 +8,21 @@ D = Derecha
 Espacio = Iniciar juego
 I = Instrucciones
 E = Destruir obstáculo
+P = Pausa
 
 
 OBJETIVO:
 Recolectar los 15 diamantes a lo largo de los 3 niveles.
 
 ELEMENTOS:
-Jugador (Amarillo)
-Obstáculos (Cuadrados grises)
-Diamante (Rombo celeste)
+Jugador (Minero)
+Obstáculos (Rocas grises)
+Diamante (Diamante celeste)
+Topo (Topo marrón)
+Manzana (Manzana roja)
 
 CONDICION DE VICTORIA:
 Recolectar todos los diamantes
 
 CONDICION DE DERROTA:
-Por ahora no hay
+Colisionar con el topo o exceder el tiempo limite del oxígeno

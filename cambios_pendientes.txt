@@ -1,0 +1,37 @@
+trabajo pendiente:
+
+pantallas:
+    - agregar los sprites a la pantalla de instrucciones
+    - agregar un menú de pausa con la tecla "p"
+    - agregar que con la tecla "esc" se pueda cerrar el juego durante la pantalla de inicio
+
+sprites (recomiendo la página Piskelapp):
+    - animar los sprites del minero (hacer que mueva las piernas o algo)
+    - animar los sprites del topo (hacer que mueva los brazos o la nariz)
+    - [opcional] animal el diamante y que tenga un movimiento de subir y bajar, quizas agregar
+    un brillo
+
+mecánicas:
+    - una puerta que te lleva al siguiente nivel, que se desbloquea al conseguir los 5 diamantes
+    del nivel
+    - cambiar los diamantes, que aparezcan de a 1 en vez de los 5 al mismo tiempo
+    - cambiar la inteligencia del topo, que persiga al jugador con un 70% de chance de
+    avanzar al jugador, y un 30% de chance de que se mueva a otra casilla aleatoria
+    abyacente a el
+    - que el topo pueda pasar sobre los obstáculos pero que vaya mas lento
+
+visuales:
+    - cambiar el contador de oxigeno por una barra
+
+sonidos (recomiendo la página mixkit):
+    - romper roca
+    - recolectar diamante
+    - avanzar de nivel
+    - victoria
+    - derrota
+
+música:
+    - durante el inicio
+    - durante el juego
+    - victoria
+    - derrota
