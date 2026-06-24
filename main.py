@@ -3,6 +3,7 @@ import os
 import random
 import pygame
 
+
 #estados
 ESTADO_INICIO = "inicio"
 ESTADO_INSTRUCCIONES = "instrucciones"
@@ -208,7 +209,6 @@ def avanzar(tablero, pos_jugador, direccion):
 def romper_roca(tablero, pos_jugador, direccion): #mecanica de mineria
 
     col, fila = pos_jugador
-
     dir_col, dir_fila = direccion
 
     objetivo_col = col + dir_col
@@ -218,11 +218,15 @@ def romper_roca(tablero, pos_jugador, direccion): #mecanica de mineria
         0 <= objetivo_col < COLUMNAS
         and 0 <= objetivo_fila < FILAS
     ):
-        return
+        return False
+    
 
     if tablero[objetivo_fila][objetivo_col] == ROCA:
         tablero[objetivo_fila][objetivo_col] = VACIO
+        return True
     
+    return False
+
 def mover_topo(tablero, pos_topo):
 
     col, fila = pos_topo
@@ -328,6 +332,30 @@ def main():
             SONIDO_MANZANA
         )
     )
+    sonido_diamante = pygame.mixer.Sound(
+        os.path.join(
+            DIR_SONIDOS,
+            SONIDO_DIAMANTE
+        )
+    )
+    sonido_victoria = pygame.mixer.Sound(
+        os.path.join(
+            DIR_SONIDOS,
+            SONIDO_VICTORIA
+        )
+    )
+    sonido_derrota = pygame.mixer.Sound(
+        os.path.join(
+            DIR_SONIDOS,
+            SONIDO_DERROTA
+        )
+    )
+    sonido_roca = pygame.mixer.Sound(
+        os.path.join(
+            DIR_SONIDOS,
+            SONIDO_ROCA
+        )
+    )
 
     pygame.display.set_caption("MINE IT ALL")
     fuente = pygame.font.SysFont(None, 40)
@@ -362,11 +390,14 @@ def main():
 
             if evento.type == pygame.KEYDOWN:
                 if estado == ESTADO_JUGANDO and evento.key == pygame.K_e:
-                    romper_roca(
+                    roca_rota=romper_roca(
                         tablero,
                         pos_jugador,
                         ultima_direccion
                     )
+                    if roca_rota:
+                        sonido_roca.play()
+                        
                     refrescar_tablero(
                         screen,
                         tablero,
@@ -459,8 +490,10 @@ def main():
                 nivel += 1
 
                 if nivel > len(NIVELES):
+                    sonido_victoria.play()
                     estado = ESTADO_VICTORIA
                     mostrar_pantalla(screen, PANTALLA_VICTORIA)
+                    pygame.time.wait(1000)
                     continue
 
                 else:
@@ -504,8 +537,10 @@ def main():
                 tiempo_ultimo_oxigeno = tiempo_actual
 
                 if oxigeno <= 0:
+                    sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
+                    pygame.time.wait(1000)
 
             if tiempo_actual - tiempo_ultimo_topo >= RETRASO_TOPO:
 
@@ -514,8 +549,10 @@ def main():
                     pos_topo
                 )
                 if resultado_topo == "derrota":
+                    sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
+                    pygame.time.wait(1000)
 
                     continue
 
@@ -534,7 +571,7 @@ def main():
                 
 
             if turbo_activo:
-                if tiempo_actual - tiempo_turbo >= 5000:  # 5 segundos
+                if tiempo_actual - tiempo_turbo >= 5000:  #5 segundos
                     turbo_activo = False
                     RETRASO_ACTUAL = RETRASO
 
@@ -546,10 +583,13 @@ def main():
                 )
 
                 if resultado == "derrota":
+                    sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
+                    pygame.time.wait(1000)
 
                 elif resultado == "diamante":
+                    sonido_diamante.play()
                     diamantes += 1
                     print("Diamantes:", diamantes)
                     refrescar_tablero(
@@ -563,8 +603,8 @@ def main():
                     )
 
                 elif resultado == "manzana":
-                    sonido_manzana.play()
-                    turbo_activo = True
+                    sonido_manzana.play() #carga el sonido de la manzana
+                    turbo_activo = True #actualiza el estado del turbo
                     tiempo_turbo = pygame.time.get_ticks()
                     RETRASO_ACTUAL = RETRASO2
                     refrescar_tablero(
