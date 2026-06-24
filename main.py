@@ -40,8 +40,8 @@ SONIDO_ROCA = "roca.wav"
 DIR_MUSICA = os.path.join(os.path.dirname(__file__), "data", "musica")
 MUSICA_INICIO = "musica_inicio.mp3"
 MUSICA_VICTORIA = "musica_victoria.mp3"
-musica_derrota = "musica_derrota.mp3"
-musica_juego = "musica_juego.mp3"
+MUSICA_DERROTA = "musica_derrota.mp3"
+MUSICA_JUEGO = "musica_juego.mp3"
 
 #delays de movimiento
 RETRASO = 200
@@ -251,7 +251,7 @@ def mover_topo(tablero, pos_topo):
         ):
             continue
 
-        if tablero[nueva_fila][nueva_col] in (VACIO, JUGADOR):
+        if tablero[nueva_fila][nueva_col] in (VACIO, JUGADOR, ROCA):
 
             if tablero[nueva_fila][nueva_col] == JUGADOR:
                 tablero[fila][col] = VACIO
@@ -296,6 +296,14 @@ def mostrar_pantalla(screen, nombre_archivo):
         pygame.display.flip()
         print(f"Advertencia: No se encontró la imagen {ruta}")
 
+def reproducir_musica(nombre_archivo, loop=-1):
+    ruta = os.path.join(DIR_MUSICA, nombre_archivo)
+
+    try:
+        pygame.mixer.music.load(ruta)
+        pygame.mixer.music.play(loop)
+    except Exception as e:
+        print("No se encontró música", e)
 
 def main():
     pygame.init()
@@ -374,13 +382,14 @@ def main():
     turbo_activo = False
     tiempo_turbo = 0
     tiempo_ultimo_topo = 0
-    RETRASO_TOPO = 90
+    RETRASO_TOPO = 200
     OXIGENO_MAX = 30
     oxigeno = OXIGENO_MAX
     tiempo_ultimo_oxigeno = pygame.time.get_ticks()
 
 
     mostrar_pantalla(screen, PANTALLA_INICIO)
+    reproducir_musica(MUSICA_INICIO)
     
     while running:
         for evento in pygame.event.get():
@@ -432,6 +441,7 @@ def main():
                         tiempo_turbo = 0
                         tiempo_ultimo_mov = pygame.time.get_ticks()
                         estado = ESTADO_JUGANDO
+                        reproducir_musica(MUSICA_JUEGO)
                         refrescar_tablero(
                             screen,
                             tablero,
@@ -449,6 +459,7 @@ def main():
                 elif estado == ESTADO_INSTRUCCIONES:
                     estado = ESTADO_INICIO
                     mostrar_pantalla(screen, PANTALLA_INICIO)
+                    reproducir_musica(MUSICA_INICIO)
 
                 elif estado in (ESTADO_DERROTA, ESTADO_VICTORIA):
 
@@ -468,6 +479,7 @@ def main():
                         tiempo_ultimo_mov = pygame.time.get_ticks()
 
                         estado = ESTADO_JUGANDO
+                        reproducir_musica(MUSICA_JUEGO)
 
                         refrescar_tablero(
                             screen,
@@ -482,6 +494,7 @@ def main():
                     elif evento.key == pygame.K_ESCAPE:
                         estado = ESTADO_INICIO
                         mostrar_pantalla(screen, PANTALLA_INICIO)
+                        reproducir_musica(MUSICA_INICIO)
 
         if estado == ESTADO_JUGANDO:
             keys = pygame.key.get_pressed()
@@ -490,10 +503,12 @@ def main():
                 nivel += 1
 
                 if nivel > len(NIVELES):
+                    pygame.mixer.music.stop()
                     sonido_victoria.play()
+                    pygame.time.wait(4500)
+                    reproducir_musica(MUSICA_VICTORIA)
                     estado = ESTADO_VICTORIA
                     mostrar_pantalla(screen, PANTALLA_VICTORIA)
-                    pygame.time.wait(1000)
                     continue
 
                 else:
@@ -537,10 +552,12 @@ def main():
                 tiempo_ultimo_oxigeno = tiempo_actual
 
                 if oxigeno <= 0:
+                    pygame.mixer.music.stop()
                     sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
-                    pygame.time.wait(1000)
+                    pygame.time.wait(4500)
+                    reproducir_musica(MUSICA_DERROTA, 0)
 
             if tiempo_actual - tiempo_ultimo_topo >= RETRASO_TOPO:
 
@@ -549,10 +566,12 @@ def main():
                     pos_topo
                 )
                 if resultado_topo == "derrota":
+                    pygame.mixer.music.stop()
                     sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
-                    pygame.time.wait(1000)
+                    pygame.time.wait(4500)
+                    reproducir_musica(MUSICA_DERROTA, 0)
 
                     continue
 
@@ -583,10 +602,12 @@ def main():
                 )
 
                 if resultado == "derrota":
+                    pygame.mixer.music.stop()
                     sonido_derrota.play()
                     estado = ESTADO_DERROTA
                     mostrar_pantalla(screen, PANTALLA_DERROTA)
-                    pygame.time.wait(1000)
+                    pygame.time.wait(4500)
+                    reproducir_musica(MUSICA_DERROTA, 0)
 
                 elif resultado == "diamante":
                     sonido_diamante.play()
