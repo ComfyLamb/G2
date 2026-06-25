@@ -13,7 +13,7 @@ ESTADO_VICTORIA = "victoria"
 ESTADO_PAUSA = "pausa"
 
 #pantallas
-DIR_PANTALLAS = os.path.join(os.path.dirname(__file__), "data", "pantallas")
+DIR_PANTALLAS = os.path.join(os.path.dirname(__file__), "data", "pantallas") #busca carpeta de pantallas
 PANTALLA_INICIO = "pantalla_inicio.bmp"
 PANTALLA_INSTRUCCIONES = "pantalla_instrucciones.bmp"
 PANTALLA_VICTORIA = "pantalla_victoria.bmp"
@@ -21,15 +21,16 @@ PANTALLA_DERROTA = "pantalla_derrota.bmp"
 PANTALLA_PAUSA = "pantalla_pausa.bmp"
 
 #sprites
-DIR_SPRITES = os.path.join(os.path.dirname(__file__), "data", "sprites")
+DIR_SPRITES = os.path.join(os.path.dirname(__file__), "data", "sprites") #busca carpeta de sprites
 SPRITE_MINERO = "minero.png"
 SPRITE_TOPO = "topo.png"
 SPRITE_ROCA = "roca.png"
 SPRITE_DIAMANTE = "diamante.png"
 SPRITE_MANZANA = "manzana.png"
+SPRITE_LAVA = "lava.png"
 
 #sonidos
-DIR_SONIDOS = os.path.join(os.path.dirname(__file__), "data", "sonidos")
+DIR_SONIDOS = os.path.join(os.path.dirname(__file__), "data", "sonidos") #busca carpeta de sfx
 SONIDO_DERROTA = "derrota.wav"
 SONIDO_VICTORIA = "victoria.wav"
 SONIDO_DIAMANTE = "diamante.wav"
@@ -37,13 +38,13 @@ SONIDO_MANZANA = "manzana.wav"
 SONIDO_ROCA = "roca.wav"
 
 #música
-DIR_MUSICA = os.path.join(os.path.dirname(__file__), "data", "musica")
+DIR_MUSICA = os.path.join(os.path.dirname(__file__), "data", "musica") #busca carpeta de soundtracks
 MUSICA_INICIO = "musica_inicio.mp3"
 MUSICA_VICTORIA = "musica_victoria.mp3"
 MUSICA_DERROTA = "musica_derrota.mp3"
 MUSICA_JUEGO = "musica_juego.mp3"
 
-#delays de movimiento
+#delays de movimiento usados en el movimiento del jugador o del topo
 RETRASO = 200
 RETRASO2 = 100
 
@@ -54,69 +55,108 @@ JUGADOR = 2
 DIAMANTE = 3
 TOPO = 4
 MANZANA = 5
+LAVA = 6
 
 #cantidad de cosas en cada nivel
 NIVELES = [
     {
-        "diamantes": 5,
+        "diamantes": 5, #nivel 1: 5 diamantes, 100 rocas, 1 manzana, 3 charcos de lava, 1 topo
         "rocas": 100,
         "topo": 1,
-        "manzana": 1
+        "manzana": 1,
+        "lava": 3
     },
     {
-        "diamantes": 5,
-        "rocas": 100,
+        "diamantes": 5, #nivel 2: 5 diamantes, 125 rocas, 1 manzana, 5 charcos de lava, 1 topo
+        "rocas": 125,
         "topo": 1,
-        "manzana": 1
+        "manzana": 1,
+        "lava": 5
     },
     {
-        "diamantes": 5,
+        "diamantes": 5, #nivel 3: 5 diamantes, 150 rocas, 1 manzana, 9 charcos de lava, 1 topo
         "rocas": 150,
         "topo": 1,
-        "manzana": 1
+        "manzana": 1,
+        "lava": 9
+    },
+    {
+        "diamantes": 1,
+        "rocas": 150,
+        "topo": 1,
+        "manzana": 0,
+        "lava": 25
     }
 ]
 
-#tablero
+#tablero, importante no cambiar ya que el tamaño de los sprites estan pensados para que quepan en cada casilla
 FILAS = 15
 COLUMNAS = 15
 
 
-def aparecer_aleatorio(tablero, id_elem):
+def aparecer_aleatorio(tablero, id_elem): #llama a la matriz y luego a la id de los elementos
 
-    vacios = []
-    for fila in range(FILAS):
-        for columna in range(COLUMNAS):
+    vacios = [] #lista donde se guardan las casillas de "vacio"
+    for fila in range(FILAS): #recorre cada fila
+        for columna in range(COLUMNAS): #recorre cada columna
             elem_pos = tablero[fila][columna]
             if elem_pos == VACIO:
-                vacios.append((columna, fila))
+                if id_elem in (JUGADOR, TOPO, DIAMANTE, MANZANA):
+                    if posicion_segura(tablero, columna, fila):
+                        vacios.append((columna, fila))
+                else:
+                    vacios.append((columna, fila))
     if len(vacios) == 0:
         return -1, -1
     columna, fila = random.choice(vacios)
     tablero[fila][columna] = id_elem
     return columna, fila
 
+#funcion que hace que el jugador, el diamante, la manzana y el topo no aparezcan encerrados de lava
+def posicion_segura(tablero, columna, fila):
+
+    cantidad_lava = 0
+
+    for dir_col, dir_fila in [
+        (0,1),
+        (0,-1),
+        (1,0),
+        (-1,0)
+    ]:
+
+        nueva_col = columna + dir_col
+        nueva_fila = fila + dir_fila
+
+        if (
+            0 <= nueva_col < COLUMNAS
+            and 0 <= nueva_fila < FILAS
+        ):
+            if tablero[nueva_fila][nueva_col] == LAVA:
+                cantidad_lava += 1
+
+    return cantidad_lava < 3
+
 def poblar_tablero(tablero, nivel):
 
-    print("Nivel:", nivel + 1)
+    print("Nivel:", nivel + 1) #muestra en la consola que nivel se está jugando, el +1 porque python cuenta desde 0
     config = NIVELES[nivel]
 
-    for i in range(config["rocas"]):
+    for i in range(config["lava"]): #genera la lava
+        aparecer_aleatorio(tablero, LAVA)
+
+    for i in range(config["rocas"]): #genera las rocas
         aparecer_aleatorio(tablero, ROCA)
 
-    for i in range(config["diamantes"]):
-        aparecer_aleatorio(tablero, DIAMANTE)
+    aparecer_aleatorio(tablero, DIAMANTE) #genera un solo diamante
     
     pos_topo = None
-
-    for i in range(config["topo"]):
+    for i in range(config["topo"]): #genera al topo
         pos_topo = aparecer_aleatorio(tablero, TOPO)
 
-    for i in range(config["manzana"]):
+    for i in range(config["manzana"]): #genera la manzana
         aparecer_aleatorio(tablero, MANZANA)
     
     return pos_topo
-
 
 def refrescar_tablero(
         screen,
@@ -128,7 +168,7 @@ def refrescar_tablero(
         sprites
         ):
 
-    screen.fill("gray30")
+    screen.fill("gray20") #color base del tablero
 
     alto_elem = screen.get_height() / FILAS
     ancho_elem = screen.get_width() / COLUMNAS
@@ -185,18 +225,21 @@ def avanzar(tablero, pos_jugador, direccion):
 
     pos_elem = tablero[ind_nueva_fila][ind_nueva_col]
 
-    if pos_elem == TOPO:
+    if pos_elem == TOPO: #si el jugador colisiona con el topo, pierde
         return "derrota", pos_jugador
 
-    if pos_elem == ROCA:
+    if pos_elem == ROCA: #si el jugador colisiona con una roca, no pasa nada
         return "ok", pos_jugador
     
-    if pos_elem == MANZANA:
+    if pos_elem == LAVA: #si el jugador colisiona con lava, pierde
+        return "derrota", pos_jugador
+    
+    if pos_elem == MANZANA: #si el jugador colisiona con la manzana, la casilla se reemplaza con "vacio"
         tablero[ind_actual_fila][ind_actual_col] = VACIO
         tablero[ind_nueva_fila][ind_nueva_col] = JUGADOR
         return "manzana", (ind_nueva_col, ind_nueva_fila)
 
-    if pos_elem == DIAMANTE:
+    if pos_elem == DIAMANTE: #si el jugador colisiona con el diamante, la casilla se reemplaza con "vacio"
         tablero[ind_actual_fila][ind_actual_col] = VACIO
         tablero[ind_nueva_fila][ind_nueva_col] = JUGADOR       
         return "diamante", (ind_nueva_col, ind_nueva_fila)
@@ -206,7 +249,8 @@ def avanzar(tablero, pos_jugador, direccion):
 
     return "ok", (ind_nueva_col, ind_nueva_fila)
 
-def romper_roca(tablero, pos_jugador, direccion): #mecanica de mineria
+#mecánica de minería
+def romper_roca(tablero, pos_jugador, direccion): #llama al tablero, la posición del jugador y luego la dirección
 
     col, fila = pos_jugador
     dir_col, dir_fila = direccion
@@ -221,24 +265,25 @@ def romper_roca(tablero, pos_jugador, direccion): #mecanica de mineria
         return False
     
 
-    if tablero[objetivo_fila][objetivo_col] == ROCA:
-        tablero[objetivo_fila][objetivo_col] = VACIO
+    if tablero[objetivo_fila][objetivo_col] == ROCA: #si el objetivo es una roca:
+        tablero[objetivo_fila][objetivo_col] = VACIO #lo combierte en "vacio"
         return True
     
     return False
 
-def mover_topo(tablero, pos_topo):
+#movimiento del topo
+def mover_topo(tablero, pos_topo): #llama al tablero y a la posición actual del topo
 
     col, fila = pos_topo
 
-    movimientos = [
+    movimientos = [ #señala cuánto se puede llegar a mover el topo, en este caso de a 1 casilla de distancia
         (0, 1),
         (0, -1),
         (1, 0),
         (-1, 0)
     ]
 
-    random.shuffle(movimientos)
+    random.shuffle(movimientos) #movimiento aleatorio
 
     for dir_col, dir_fila in movimientos:
 
@@ -251,12 +296,12 @@ def mover_topo(tablero, pos_topo):
         ):
             continue
 
-        if tablero[nueva_fila][nueva_col] in (VACIO, JUGADOR, ROCA):
+        if tablero[nueva_fila][nueva_col] in (VACIO, JUGADOR, ROCA): #solo se puede mover en "vacio", "jugador", "roca"
 
             if tablero[nueva_fila][nueva_col] == JUGADOR:
                 tablero[fila][col] = VACIO
                 tablero[nueva_fila][nueva_col] = TOPO
-                return "derrota"
+                return "derrota" #si el topo toca al jugador, retorna derrota
 
             tablero[fila][col] = VACIO
             tablero[nueva_fila][nueva_col] = TOPO
@@ -294,22 +339,26 @@ def mostrar_pantalla(screen, nombre_archivo):
 
         screen.fill("black")
         pygame.display.flip()
-        print(f"Advertencia: No se encontró la imagen {ruta}")
+        print("No se encontró imagen") #aviso de posible error
 
 def reproducir_musica(nombre_archivo, loop=-1):
     ruta = os.path.join(DIR_MUSICA, nombre_archivo)
 
     try:
-        pygame.mixer.music.load(ruta)
-        pygame.mixer.music.play(loop)
+        pygame.mixer.music.load(ruta) #inicia el soundtrack
+        pygame.mixer.music.set_volume(0.4) #ajusta el volumen del soundtrack al 40%
+        pygame.mixer.music.play(loop) #reinicia el soundtrack de forma infinita
     except Exception as e:
-        print("No se encontró música", e)
+        print("No se encontró música", e) #aviso de posible error
 
 def main():
     pygame.init()
     pygame.mixer.init()
     screen = pygame.display.set_mode((800, 800))
 
+    sprite_lava = pygame.image.load(
+        os.path.join(DIR_SPRITES, SPRITE_LAVA)
+    )
     sprite_roca = pygame.image.load(
         os.path.join(DIR_SPRITES, SPRITE_ROCA)
     )
@@ -330,7 +379,8 @@ def main():
         JUGADOR: sprite_minero,
         MANZANA: sprite_manzana,
         TOPO: sprite_topo,
-        DIAMANTE: sprite_diamante
+        DIAMANTE: sprite_diamante,
+        LAVA: sprite_lava
     }
     
 
@@ -398,6 +448,19 @@ def main():
                 running = False
 
             if evento.type == pygame.KEYDOWN:
+
+                #tecla de admin para pasar instantaneamente de nivel
+                if estado == ESTADO_JUGANDO and evento.key == pygame.K_n:
+                    diamantes = NIVELES[nivel - 1]["diamantes"]
+
+                #vuelve al inicio con la tecla escape durante el juego
+                if estado == ESTADO_JUGANDO and evento.key == pygame.K_ESCAPE:
+                    pygame.mixer.music.stop()
+                    reproducir_musica(MUSICA_INICIO)
+                    estado = ESTADO_INICIO
+                    mostrar_pantalla(screen, PANTALLA_INICIO)
+                    continue #este "continue" es importante para que no se cierre el juego instantaneamente
+
                 if estado == ESTADO_JUGANDO and evento.key == pygame.K_e:
                     roca_rota=romper_roca(
                         tablero,
@@ -418,6 +481,9 @@ def main():
                     )
 
                 if estado == ESTADO_INICIO:
+                    
+                    if evento.key == pygame.K_ESCAPE:
+                        running = False
 
                     if evento.key == pygame.K_SPACE:
                         OXIGENO_MAX = 30
@@ -459,7 +525,6 @@ def main():
                 elif estado == ESTADO_INSTRUCCIONES:
                     estado = ESTADO_INICIO
                     mostrar_pantalla(screen, PANTALLA_INICIO)
-                    reproducir_musica(MUSICA_INICIO)
 
                 elif estado in (ESTADO_DERROTA, ESTADO_VICTORIA):
 
@@ -612,7 +677,10 @@ def main():
                 elif resultado == "diamante":
                     sonido_diamante.play()
                     diamantes += 1
+                    if diamantes < NIVELES[nivel - 1]["diamantes"]:
+                        aparecer_aleatorio(tablero, DIAMANTE)
                     print("Diamantes:", diamantes)
+
                     refrescar_tablero(
                         screen,
                         tablero,
